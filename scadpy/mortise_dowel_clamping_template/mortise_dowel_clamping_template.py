@@ -93,6 +93,12 @@ mortise_rounding = CustomizerSliderVariable(
     2.1,
     label="Zero for square corners, half the mortise width for full rounding",
 )
+mortise_enable_center_sights = CustomizerDropdownVariable(
+    "mortise_enable_center_sights",
+    1,
+    [0, 1],
+    label="Small knicks for centering in both directions",
+)
 
 
 mortise_flange_count = CustomizerDropdownVariable(
@@ -174,6 +180,12 @@ mortise_flange = cuboid(
     .xmove(-mortise_flange_screw_offset)
 ).diff()
 
+sight = cyl(
+    h=plate_thickness / 2,
+    d=1 * mortise_enable_center_sights,
+    rounding=0.5 * mortise_enable_center_sights,
+)
+
 dowel_holes = (
     cyl(h=20, d=dowel_diameter, anchor=TOP, center=True)()
     .xcopies(spacing=dowel_spacing, n=node_count)
@@ -219,6 +231,11 @@ mortise_plate = cuboid(
     [mortise_length, mortise_width_with_relief, plate_thickness + 2],
     rounding=mortise_rounding,
     edges=[FRONT + LEFT, FRONT + RIGHT, BACK + LEFT, BACK + RIGHT],
+)(
+    sight.position(LEFT + BOTTOM)
+    + sight.position(RIGHT + BOTTOM)
+    + sight.position(FRONT + BOTTOM)
+    + sight.position(BACK + BOTTOM)
 )
 
 

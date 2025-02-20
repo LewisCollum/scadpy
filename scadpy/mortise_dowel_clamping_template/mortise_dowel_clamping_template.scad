@@ -62,6 +62,8 @@ mortise_brim_width = 0; //[]
 mortise_brim_thickness = 4; //[]
 //Zero for square corners, half the mortise width for full rounding
 mortise_rounding = 2.1; //[]
+//Small knicks for centering in both directions
+mortise_enable_center_sights = 1; //[0, 1]
 //For hinges with flanges and a deeper center mortise
 mortise_flange_count = 0; //[0, 1, 2]
 //Serves as boundary for interior deeper mortise (mortise_length - interior_mortise_length) / 2
@@ -137,7 +139,22 @@ xrot(a = 180) {
 					tag(tag = "remove") {
 						xcopies(n = segment_count, spacing = dowel_spacing) {
 							ymove(y = (mortise_position * (((inner_width - (mortise_width + mortise_relief)) / 2) + mortise_relief))) {
-								cuboid(edges = [(FRONT + LEFT), (FRONT + RIGHT), (BACK + LEFT), (BACK + RIGHT)], rounding = mortise_rounding, size = [mortise_length, (mortise_width + mortise_relief), (plate_thickness + 2)]);
+								cuboid(edges = [(FRONT + LEFT), (FRONT + RIGHT), (BACK + LEFT), (BACK + RIGHT)], rounding = mortise_rounding, size = [mortise_length, (mortise_width + mortise_relief), (plate_thickness + 2)]) {
+									union() {
+										position(from = (LEFT + BOTTOM)) {
+											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+										}
+										position(from = (RIGHT + BOTTOM)) {
+											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+										}
+										position(from = (FRONT + BOTTOM)) {
+											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+										}
+										position(from = (BACK + BOTTOM)) {
+											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+										}
+									}
+								}
 							}
 						}
 					}
