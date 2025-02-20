@@ -62,6 +62,19 @@ mortise_brim_width = 0; //[]
 mortise_brim_thickness = 4; //[]
 //Zero for square corners, half the mortise width for full rounding
 mortise_rounding = 2.1; //[]
+//For hinges with flanges and a deeper center mortise
+mortise_flange_count = 0; //[0, 1, 2]
+//Serves as boundary for interior deeper mortise (mortise_length - interior_mortise_length) / 2
+mortise_flange_length = 14.5; //[]
+//Matches flange thickness for a flush fit
+mortise_flange_thickness = 5.8; //[]
+mortise_flange_screw_diameter = "M5"; //[M2, M3, M4, M5, M6, M8, M10, M12]
+//Number of screws to secure the flange
+mortise_flange_screw_count = 2; //[]
+//Center-to-center spacing between screws
+mortise_flange_screw_spacing = 11; //[]
+//Offset from the edge of the flange to the first screw
+mortise_flange_screw_offset = 9; //[]
 //0: No clamping, 1: Clamp one side (towards mortise edge relief), 2: Clamp both sides (allows for centering mortise)
 adjust_sides = 2; //[0, 1, 2]
 //At least (inner_width - piece_width) / 2 + wall_thickness
@@ -140,6 +153,25 @@ xrot(a = 180) {
 			ymove(y = (((-(inner_width + (2 * wall_thickness))) / 2) - 35)) {
 				grid_copies(n = [(segment_count + 1), adjust_sides], spacing = 30) {
 					screw(anchor = TOP, head = "socket ribbed", length = screw_length, spec = screw_specification);
+				}
+			}
+		}
+		zmove(z = (plate_thickness / 2)) {
+			ymove(y = (((inner_width + (2 * wall_thickness)) / 2) + 35)) {
+				grid_copies(n = [mortise_flange_count, 1], spacing = 60) {
+					diff() {
+						cuboid(anchor = TOP, edges = [(BACK + RIGHT), (FRONT + RIGHT)], rounding = mortise_rounding, size = [mortise_flange_length, mortise_width, mortise_flange_thickness]) {
+							xmove(x = (-mortise_flange_screw_offset)) {
+								position(from = RIGHT) {
+									orient(anchor = BOTTOM) {
+										ycopies(n = mortise_flange_screw_count, spacing = mortise_flange_screw_spacing) {
+											screw_hole(counterbore = 1, head = "flat", l = mortise_flange_thickness, spec = mortise_flange_screw_diameter);
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
