@@ -139,19 +139,19 @@ xrot(a = 180) {
 					tag(tag = "remove") {
 						xcopies(n = segment_count, spacing = dowel_spacing) {
 							ymove(y = (mortise_position * (((inner_width - (mortise_width + mortise_relief)) / 2) + mortise_relief))) {
-								cuboid(edges = [(FRONT + LEFT), (FRONT + RIGHT), (BACK + LEFT), (BACK + RIGHT)], rounding = mortise_rounding, size = [mortise_length, (mortise_width + mortise_relief), (plate_thickness + 2)]) {
+								cuboid(edges = [(FRONT + LEFT), (FRONT + RIGHT), (BACK + LEFT), (BACK + RIGHT)], rounding = mortise_rounding, size = [mortise_length, (mortise_width + mortise_relief), (plate_thickness + 0.1)]) {
 									union() {
 										position(from = (LEFT + BOTTOM)) {
-											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+											cyl(d = (1.5 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
 										}
 										position(from = (RIGHT + BOTTOM)) {
-											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+											cyl(d = (1.5 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
 										}
 										position(from = (FRONT + BOTTOM)) {
-											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+											cyl(d = (1.5 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
 										}
 										position(from = (BACK + BOTTOM)) {
-											cyl(d = (1 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
+											cyl(d = (1.5 * mortise_enable_center_sights), h = (plate_thickness / 2), rounding = (0.5 * mortise_enable_center_sights));
 										}
 									}
 								}

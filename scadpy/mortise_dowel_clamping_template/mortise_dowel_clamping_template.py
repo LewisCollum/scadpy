@@ -182,7 +182,7 @@ mortise_flange = cuboid(
 
 sight = cyl(
     h=plate_thickness / 2,
-    d=1 * mortise_enable_center_sights,
+    d=1.5 * mortise_enable_center_sights,
     rounding=0.5 * mortise_enable_center_sights,
 )
 
@@ -228,7 +228,7 @@ thumb_screw = screw(
 
 
 mortise_plate = cuboid(
-    [mortise_length, mortise_width_with_relief, plate_thickness + 2],
+    [mortise_length, mortise_width_with_relief, plate_thickness + 0.1],
     rounding=mortise_rounding,
     edges=[FRONT + LEFT, FRONT + RIGHT, BACK + LEFT, BACK + RIGHT],
 )(
