@@ -21,7 +21,7 @@ label_width = CustomizerSliderVariable(
 
 label_height = CustomizerSliderVariable(
     "label_height",
-    20,
+    30,
     min_=5,
     max_=100,
     label="Height of the label in mm"
@@ -37,8 +37,20 @@ label_thickness = CustomizerSliderVariable(
 
 label_text = CustomizerTextboxVariable(
     "label_text",
+    "SLIDE",
+    label="Text to display on the label (single line)"
+)
+
+text_line_2 = CustomizerTextboxVariable(
+    "text_line_2",
     "LABEL",
-    label="Text to display on the label"
+    label="Second line of text (leave empty for single line)"
+)
+
+text_line_3 = CustomizerTextboxVariable(
+    "text_line_3",
+    "",
+    label="Third line of text (leave empty for fewer lines)"
 )
 
 text_size = CustomizerSliderVariable(
@@ -69,26 +81,61 @@ base = cuboid(
     anchor=CENTER
 )
 
-# Create engraved text (cut into base)
-engraved_text_3d = linear_extrude(height=label_thickness + 1)(
-    text(
-        text=label_text,
+# Function to create multiline text
+def create_multiline_text(line1, line2, line3, text_size, font, height):
+    """Create 3D text from multiple lines - always creates 3 lines, conditionally shown"""
+    line_spacing = text_size * 1.2  # Line spacing factor
+    
+    # Create all three lines of text, positioned vertically
+    text_objects = []
+    
+    # Line 1 (top)
+    text_2d_1 = text(
+        text=line1,
         size=text_size,
-        font=text_font,
+        font=font,
         halign="center",
         valign="center"
     )
+    text_3d_1 = linear_extrude(height=height)(text_2d_1).translate([0, line_spacing, 0])
+    text_objects.append(text_3d_1)
+    
+    # Line 2 (middle)
+    text_2d_2 = text(
+        text=line2,
+        size=text_size,
+        font=font,
+        halign="center",
+        valign="center"
+    )
+    text_3d_2 = linear_extrude(height=height)(text_2d_2).translate([0, 0, 0])
+    text_objects.append(text_3d_2)
+    
+    # Line 3 (bottom)
+    text_2d_3 = text(
+        text=line3,
+        size=text_size,
+        font=font,
+        halign="center",
+        valign="center"
+    )
+    text_3d_3 = linear_extrude(height=height)(text_2d_3).translate([0, -line_spacing, 0])
+    text_objects.append(text_3d_3)
+    
+    # Combine all lines
+    result = text_objects[0]
+    for text_obj in text_objects[1:]:
+        result += text_obj
+    return result
+
+# Create engraved text (cut into base)
+engraved_text_3d = create_multiline_text(
+    label_text, text_line_2, text_line_3, text_size, text_font, label_thickness + 1
 ).translate([0, 0, -label_thickness / 2])
 
 # Create raised text (added on top)
-raised_text_3d = linear_extrude(height=label_thickness)(
-    text(
-        text=label_text,
-        size=text_size,
-        font=text_font,
-        halign="center",
-        valign="center"
-    )
+raised_text_3d = create_multiline_text(
+    label_text, text_line_2, text_line_3, text_size, text_font, label_thickness
 ).translate([0, 0, label_thickness / 2])
 
 # Combine based on text style using scaling to show/hide parts
