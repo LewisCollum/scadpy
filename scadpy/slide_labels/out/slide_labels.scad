@@ -40,8 +40,12 @@ label_text = "SLIDE";
 text_line_2 = "LABEL";
 //Third line of text (leave empty for fewer lines)
 text_line_3 = "";
-//Size of the text
-text_size = 8; //[1:50]
+//Size of the first line of text
+text_size = 10; //[1:50]
+//Size of the second line of text
+text_size_2 = 8; //[1:50]
+//Size of the third line of text
+text_size_3 = 6; //[1:50]
 //Font for the text
 text_font = "Arial"; //[Arial, Arial Black, Times, Times New Roman, Courier, Courier New, Helvetica, DejaVu Sans, Liberation Sans, Ubuntu, FreeSans]
 //0: Engraved text, 1: Raised text
@@ -53,19 +57,19 @@ union() {
 			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
 			translate(v = [0, 0, ((-label_thickness) / 2)]) {
 				union() {
-					translate(v = [0, (text_size * 1.2), 0]) {
+					translate(v = [0, 12, 0]) {
 						linear_extrude(height = (label_thickness + 1)) {
 							text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
 						}
 					}
 					translate(v = [0, 0, 0]) {
 						linear_extrude(height = (label_thickness + 1)) {
-							text(font = text_font, halign = "center", size = text_size, text = text_line_2, valign = "center");
+							text(font = text_font, halign = "center", size = text_size_2, text = text_line_2, valign = "center");
 						}
 					}
-					translate(v = [0, (-(text_size * 1.2)), 0]) {
+					translate(v = [0, -12, 0]) {
 						linear_extrude(height = (label_thickness + 1)) {
-							text(font = text_font, halign = "center", size = text_size, text = text_line_3, valign = "center");
+							text(font = text_font, halign = "center", size = text_size_3, text = text_line_3, valign = "center");
 						}
 					}
 				}
@@ -77,19 +81,19 @@ union() {
 			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
 			translate(v = [0, 0, (label_thickness / 2)]) {
 				union() {
-					translate(v = [0, (text_size * 1.2), 0]) {
+					translate(v = [0, 12, 0]) {
 						linear_extrude(height = label_thickness) {
 							text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
 						}
 					}
 					translate(v = [0, 0, 0]) {
 						linear_extrude(height = label_thickness) {
-							text(font = text_font, halign = "center", size = text_size, text = text_line_2, valign = "center");
+							text(font = text_font, halign = "center", size = text_size_2, text = text_line_2, valign = "center");
 						}
 					}
-					translate(v = [0, (-(text_size * 1.2)), 0]) {
+					translate(v = [0, -12, 0]) {
 						linear_extrude(height = label_thickness) {
-							text(font = text_font, halign = "center", size = text_size, text = text_line_3, valign = "center");
+							text(font = text_font, halign = "center", size = text_size_3, text = text_line_3, valign = "center");
 						}
 					}
 				}

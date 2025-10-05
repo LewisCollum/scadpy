@@ -55,10 +55,26 @@ text_line_3 = CustomizerTextboxVariable(
 
 text_size = CustomizerSliderVariable(
     "text_size",
+    10,
+    min_=1,
+    max_=50,
+    label="Size of the first line of text"
+)
+
+text_size_2 = CustomizerSliderVariable(
+    "text_size_2",
     8,
     min_=1,
     max_=50,
-    label="Size of the text"
+    label="Size of the second line of text"
+)
+
+text_size_3 = CustomizerSliderVariable(
+    "text_size_3",
+    6,
+    min_=1,
+    max_=50,
+    label="Size of the third line of text"
 )
 
 text_font = CustomizerDropdownVariable(
@@ -82,17 +98,19 @@ base = cuboid(
 )
 
 # Function to create multiline text
-def create_multiline_text(line1, line2, line3, text_size, font, height):
-    """Create 3D text from multiple lines - always creates 3 lines, conditionally shown"""
-    line_spacing = text_size * 1.2  # Line spacing factor
+def create_multiline_text(line1, line2, line3, size1, size2, size3, font, height):
+    """Create 3D text from multiple lines with different sizes"""
+    # Use a fixed line spacing based on the largest typical text size
+    # This ensures consistent spacing regardless of individual text sizes
+    line_spacing = 12  # Fixed spacing that works well for text sizes 6-12
     
     # Create all three lines of text, positioned vertically
     text_objects = []
     
-    # Line 1 (top)
+    # Line 1 (top) - use size1
     text_2d_1 = text(
         text=line1,
-        size=text_size,
+        size=size1,
         font=font,
         halign="center",
         valign="center"
@@ -100,10 +118,10 @@ def create_multiline_text(line1, line2, line3, text_size, font, height):
     text_3d_1 = linear_extrude(height=height)(text_2d_1).translate([0, line_spacing, 0])
     text_objects.append(text_3d_1)
     
-    # Line 2 (middle)
+    # Line 2 (middle) - use size2
     text_2d_2 = text(
         text=line2,
-        size=text_size,
+        size=size2,
         font=font,
         halign="center",
         valign="center"
@@ -111,10 +129,10 @@ def create_multiline_text(line1, line2, line3, text_size, font, height):
     text_3d_2 = linear_extrude(height=height)(text_2d_2).translate([0, 0, 0])
     text_objects.append(text_3d_2)
     
-    # Line 3 (bottom)
+    # Line 3 (bottom) - use size3
     text_2d_3 = text(
         text=line3,
-        size=text_size,
+        size=size3,
         font=font,
         halign="center",
         valign="center"
@@ -130,12 +148,12 @@ def create_multiline_text(line1, line2, line3, text_size, font, height):
 
 # Create engraved text (cut into base)
 engraved_text_3d = create_multiline_text(
-    label_text, text_line_2, text_line_3, text_size, text_font, label_thickness + 1
+    label_text, text_line_2, text_line_3, text_size, text_size_2, text_size_3, text_font, label_thickness + 1
 ).translate([0, 0, -label_thickness / 2])
 
 # Create raised text (added on top)
 raised_text_3d = create_multiline_text(
-    label_text, text_line_2, text_line_3, text_size, text_font, label_thickness
+    label_text, text_line_2, text_line_3, text_size, text_size_2, text_size_3, text_font, label_thickness
 ).translate([0, 0, label_thickness / 2])
 
 # Combine based on text style using scaling to show/hide parts
