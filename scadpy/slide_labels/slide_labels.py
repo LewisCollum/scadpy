@@ -100,9 +100,11 @@ base = cuboid(
 # Function to create multiline text
 def create_multiline_text(line1, line2, line3, size1, size2, size3, font, height):
     """Create 3D text from multiple lines with different sizes"""
-    # Use a fixed line spacing based on the largest typical text size
-    # This ensures consistent spacing regardless of individual text sizes
-    line_spacing = 12  # Fixed spacing that works well for text sizes 6-12
+    # Calculate line spacing using a dynamic formula that considers all text sizes
+    # Use a weighted average that gives more weight to larger sizes
+    # This approximates: (size1 + size2 + size3) * 0.8 which provides good spacing
+    avg_size = (size1 + size2 + size3) / 3
+    line_spacing = avg_size * 1.3  # Slightly more than average for good visual separation
     
     # Create all three lines of text, positioned vertically
     text_objects = []

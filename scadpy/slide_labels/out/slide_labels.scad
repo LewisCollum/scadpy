@@ -57,7 +57,7 @@ union() {
 			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
 			translate(v = [0, 0, ((-label_thickness) / 2)]) {
 				union() {
-					translate(v = [0, 12, 0]) {
+					translate(v = [0, ((((text_size + text_size_2) + text_size_3) / 3) * 1.3), 0]) {
 						linear_extrude(height = (label_thickness + 1)) {
 							text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
 						}
@@ -67,7 +67,7 @@ union() {
 							text(font = text_font, halign = "center", size = text_size_2, text = text_line_2, valign = "center");
 						}
 					}
-					translate(v = [0, -12, 0]) {
+					translate(v = [0, (-((((text_size + text_size_2) + text_size_3) / 3) * 1.3)), 0]) {
 						linear_extrude(height = (label_thickness + 1)) {
 							text(font = text_font, halign = "center", size = text_size_3, text = text_line_3, valign = "center");
 						}
@@ -81,7 +81,7 @@ union() {
 			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
 			translate(v = [0, 0, (label_thickness / 2)]) {
 				union() {
-					translate(v = [0, 12, 0]) {
+					translate(v = [0, ((((text_size + text_size_2) + text_size_3) / 3) * 1.3), 0]) {
 						linear_extrude(height = label_thickness) {
 							text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
 						}
@@ -91,7 +91,7 @@ union() {
 							text(font = text_font, halign = "center", size = text_size_2, text = text_line_2, valign = "center");
 						}
 					}
-					translate(v = [0, -12, 0]) {
+					translate(v = [0, (-((((text_size + text_size_2) + text_size_3) / 3) * 1.3)), 0]) {
 						linear_extrude(height = label_thickness) {
 							text(font = text_font, halign = "center", size = text_size_3, text = text_line_3, valign = "center");
 						}

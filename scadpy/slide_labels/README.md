@@ -15,7 +15,8 @@
 ## Features
 
 - Customizable label dimensions (width, height, thickness)
-- **Multiline text support** - up to 3 lines of text with **individual sizing**
+- **Multiline text support** - up to 3 lines of text with **individual sizing per line**
+- **Dynamic line spacing** - automatically calculated based on text sizes for optimal visual spacing
 - Customizable text content, size, and font
 - Choice between engraved text (cut into the label) or raised text (on top of the label)
 - All parameters can be adjusted through the OpenSCAD customizer
