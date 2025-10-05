@@ -33,7 +33,19 @@
 - **text_font**: Font for the text (default: "Arial", options: Arial, Arial Black, Times, Times New Roman, Courier, Courier New, Helvetica, DejaVu Sans, Liberation Sans, Ubuntu, FreeSans)
 - **text_style**: Whether text is engraved into or raised on top of the label (default: 0, options: 0=engraved, 1=raised)
 
+## Features
+
+- Customizable label dimensions (width, height, thickness)
+- **Multiline text support** - up to 3 lines of text with **individual sizing per line**
+- **Dynamic line spacing** - automatically calculated based on text sizes for optimal visual spacing
+- **Batch generation** - generate multiple labels from a YAML configuration file
+- Customizable text content, size, and font
+- Choice between engraved text (cut into the label) or raised text (on top of the label)
+- All parameters can be adjusted through the OpenSCAD customizer
+
 ## Usage
+
+### Single Label (Interactive)
 
 Run the module to generate the OpenSCAD file:
 
@@ -42,3 +54,31 @@ poetry run python -m scadpy.slide_labels.slide_labels
 ```
 
 Then open `out/slide_labels.scad` in OpenSCAD to customize and render the label.
+
+### Batch Generation (YAML Configuration)
+
+Create a `labels_config.yaml` file with your label specifications:
+
+```yaml
+labels:
+  - name: "my_label"
+    description: "Description of the label"
+    parameters:
+      label_width: 60
+      label_height: 20
+      label_text: "HELLO"
+      text_size: 10
+      # ... other parameters
+
+defaults:
+  label_width: 50
+  # ... global defaults
+```
+
+Generate all labels:
+
+```bash
+poetry run python generate_labels.py [config_file]
+```
+
+This creates individual SCAD files for each label in the `out/` directory.

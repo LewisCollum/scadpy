@@ -1,0 +1,75 @@
+# Slide Labels Configuration
+# This YAML file defines multiple labels to be generated
+# Each label will be saved as a separate SCAD file
+
+labels:
+  - name: "main_title"
+    description: "Main title label for the project"
+    parameters:
+      label_width: 80
+      label_height: 25
+      label_thickness: 2
+      label_text: "MY PROJECT"
+      text_line_2: ""
+      text_line_3: ""
+      text_size: 12
+      text_size_2: 8
+      text_size_3: 6
+      text_font: "Arial"
+      text_style: 1  # Raised text
+
+  - name: "subtitle"
+    description: "Subtitle label"
+    parameters:
+      label_width: 60
+      label_height: 20
+      label_thickness: 2
+      label_text: "Version 1.0"
+      text_line_2: "Prototype"
+      text_line_3: ""
+      text_size: 8
+      text_size_2: 6
+      text_size_3: 6
+      text_font: "Arial"
+      text_style: 0  # Engraved text
+
+  - name: "component_labels"
+    description: "Labels for different components"
+    parameters:
+      label_width: 40
+      label_height: 15
+      label_thickness: 1.5
+      label_text: "CPU"
+      text_line_2: "i7-9700K"
+      text_line_3: "3.6GHz"
+      text_size: 6
+      text_size_2: 4
+      text_size_3: 4
+      text_font: "Courier New"
+      text_style: 0
+
+  - name: "warning_label"
+    description: "Safety warning label"
+    parameters:
+      label_width: 50
+      label_height: 30
+      label_thickness: 2
+      label_text: "CAUTION"
+      text_line_2: "High Voltage"
+      text_line_3: "Do Not Touch"
+      text_size: 8
+      text_size_2: 6
+      text_size_3: 5
+      text_font: "Arial Black"
+      text_style: 1
+
+# Global defaults (optional - will be used if not specified in individual labels)
+defaults:
+  label_width: 50
+  label_height: 20
+  label_thickness: 2
+  text_size: 8
+  text_size_2: 6
+  text_size_3: 6
+  text_font: "Arial"
+  text_style: 0
