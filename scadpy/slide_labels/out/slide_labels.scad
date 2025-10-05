@@ -39,15 +39,29 @@ label_text = "LABEL";
 //Size of the text
 text_size = 8; //[1:50]
 //Font for the text
-text_font = "Arial"; //[Arial, Times, Courier, Helvetica]
-//Depth of the text engraving (0 for raised text)
-text_depth = 0.5; //[0.1:5]
+text_font = "Arial"; //[Arial, Arial Black, Times, Times New Roman, Courier, Courier New, Helvetica, DejaVu Sans, Liberation Sans, Ubuntu, FreeSans]
+//0: Engraved text, 1: Raised text
+text_style = 0; //[0, 1]
 
-difference() {
-	cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
-	translate(v = [0, 0, ((-label_thickness) / 2)]) {
-		linear_extrude(height = (label_thickness + 1)) {
-			text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
+union() {
+	scale(v = [(1 - text_style), (1 - text_style), (1 - text_style)]) {
+		difference() {
+			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
+			translate(v = [0, 0, ((-label_thickness) / 2)]) {
+				linear_extrude(height = (label_thickness + 1)) {
+					text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
+				}
+			}
+		}
+	}
+	scale(v = [text_style, text_style, text_style]) {
+		union() {
+			cuboid(anchor = CENTER, size = [label_width, label_height, label_thickness]);
+			translate(v = [0, 0, (label_thickness / 2)]) {
+				linear_extrude(height = label_thickness) {
+					text(font = text_font, halign = "center", size = text_size, text = label_text, valign = "center");
+				}
+			}
 		}
 	}
 }

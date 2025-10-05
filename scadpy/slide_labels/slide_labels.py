@@ -52,16 +52,15 @@ text_size = CustomizerSliderVariable(
 text_font = CustomizerDropdownVariable(
     "text_font",
     "Arial",
-    ["Arial", "Times", "Courier", "Helvetica"],
+    ["Arial", "Arial Black", "Times", "Times New Roman", "Courier", "Courier New", "Helvetica", "DejaVu Sans", "Liberation Sans", "Ubuntu", "FreeSans"],
     label="Font for the text"
 )
 
-text_depth = CustomizerSliderVariable(
-    "text_depth",
-    0.5,
-    min_=0.1,
-    max_=5,
-    label="Depth of the text engraving (0 for raised text)"
+text_style = CustomizerDropdownVariable(
+    "text_style",
+    0,
+    [0, 1],
+    label="0: Engraved text, 1: Raised text"
 )
 
 # Create the base rectangle
@@ -70,8 +69,8 @@ base = cuboid(
     anchor=CENTER
 )
 
-# Create the text - engraved into the top surface
-label_text_3d = linear_extrude(height=label_thickness + 1)(
+# Create engraved text (cut into base)
+engraved_text_3d = linear_extrude(height=label_thickness + 1)(
     text(
         text=label_text,
         size=text_size,
@@ -81,7 +80,25 @@ label_text_3d = linear_extrude(height=label_thickness + 1)(
     )
 ).translate([0, 0, -label_thickness / 2])
 
-# Combine base and text (engraved)
-slide_label = base - label_text_3d
+# Create raised text (added on top)
+raised_text_3d = linear_extrude(height=label_thickness)(
+    text(
+        text=label_text,
+        size=text_size,
+        font=text_font,
+        halign="center",
+        valign="center"
+    )
+).translate([0, 0, label_thickness / 2])
+
+# Combine based on text style using scaling to show/hide parts
+# Scale factor: 1 to show, 0 to hide
+show_engraved = 1 - text_style  # 1 when text_style=0, 0 when text_style=1
+show_raised = text_style        # 0 when text_style=0, 1 when text_style=1
+
+engraved_label = (base - engraved_text_3d).scale([show_engraved, show_engraved, show_engraved])
+raised_label = (base + raised_text_3d).scale([show_raised, show_raised, show_raised])
+
+slide_label = engraved_label + raised_label
 
 slide_label.save_as_scad("scadpy/slide_labels/out/slide_labels.scad")
