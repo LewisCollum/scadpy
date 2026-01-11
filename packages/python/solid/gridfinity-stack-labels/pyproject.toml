@@ -1,0 +1,12 @@
+[project]
+name = "gridfinity-stack-labels"
+version = "0.1.0"
+description = "Gridfinity Stack Labels generator"
+requires-python = ">=3.12"
+dependencies = [
+    "solidpython2>=2.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,12 @@
+[project]
+name = "emt-connector"
+version = "0.1.0"
+description = "EMT Connector generator"
+requires-python = ">=3.12"
+dependencies = [
+    "solidpython2>=2.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
