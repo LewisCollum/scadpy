@@ -28,19 +28,16 @@ _emt_sizes = [
     ["4",     4.500, 4.334]
 ];
 
+function emt_dims(size) = 
+    let(found = search([size], _emt_sizes, num_returns_first=1))
+    assert(found != [], str("Unknown EMT size: ", size))
+    let(row = _emt_sizes[found[0]])
+    [row[1] * 25.4, row[2] * 25.4];
+
 module emt_tube(size="1", l=100, anchor=CENTER, spin=0, orient=UP) {
-    // Find dimensions
-    found = search([size], _emt_sizes, num_returns_first=1);
-    
-    assert(found != [], str("Unknown EMT size: ", size, ". Available sizes: 1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4"));
-    
-    dims = _emt_sizes[found[0]];
-    od_in = dims[1];
-    id_in = dims[2];
-    
-    INCH = 25.4;
-    od = od_in * INCH;
-    id = id_in * INCH;
+    dims = emt_dims(size);
+    od = dims[0];
+    id = dims[1];
     
     attachable(anchor, spin, orient, d=od, l=l) {
         color("silver")
@@ -49,4 +46,5 @@ module emt_tube(size="1", l=100, anchor=CENTER, spin=0, orient=UP) {
     }
 }
 
+// Render if top level
 emt_tube(size=Size, l=Length);
