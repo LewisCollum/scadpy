@@ -181,20 +181,6 @@ module emt_connector(
     }
 }
 
-module leveling_foot(thread="M16", l=50, knob_d=60, anchor=TOP, spin=0, orient=UP) {
-    attachable(anchor, spin, orient, d=knob_d, l=l) {
-        union() {
-            screw(thread, l=l, head="none", anchor=TOP, orient=DOWN);
-            position(BOTTOM)
-            cyl(d=knob_d, h=15, chamfer=2, anchor=TOP) {
-                // Grip texture
-                // texture("knurled"); // Optional if enabled
-            }
-        }
-        children();
-    }
-}
-
 // Render the connector if main file (for Customizer)
 emt_connector();
 //emt_coupler_side();
