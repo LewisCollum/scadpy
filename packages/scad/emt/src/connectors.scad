@@ -59,9 +59,11 @@ module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tole
     h = hole_length + base;
     
     attachable(anchor, spin, orient, d=outer_d, h=h) {
-        down(h/2) {
-            cyl(d=outer_d, h=base, anchor=BOTTOM);
-            up(base) tube(h=hole_length, od=outer_d, id=inner_d, anchor=BOTTOM);
+        union() {
+            down(h/2) {
+                cyl(d=outer_d, h=base, anchor=BOTTOM);
+                up(base) tube(h=hole_length, od=outer_d, id=inner_d, anchor=BOTTOM);
+            }
         }
         children();
     }
@@ -75,6 +77,7 @@ module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, ba
             position(TOP) down(wall) tube(od=outer_d, id=inner_d, h=length, anchor=LEFT, spin=spin, orient=LEFT) {
                 right(outer_d/2) tag("hole") cube([outer_d, outer_d+0.1, length+0.1], anchor=TOP, center=true);
             }
+            children();
         } 
     }
 }
@@ -83,17 +86,17 @@ module emt_plug_side(trade_size="1", length=30, anchor=BOTTOM, spin=0, orient=UP
     dims = emt_dims(trade_size);
     pipe_id = dims[1];
     plug_od = pipe_id;
-    cyl(d=plug_od, h=length, anchor=anchor, spin=spin, orient=orient);
+    cyl(d=plug_od, h=length, anchor=anchor, spin=spin, orient=orient) children();
 }
 
 module emt_screw_hole_side(spec="M8", length=30, anchor=TOP, spin=0, orient=DOWN) {
     tag("neg")
-    screw_hole(spec, l=length, thread=true, anchor=anchor, spin=spin, orient=orient); 
+    screw_hole(spec, l=length, thread=true, anchor=anchor, spin=spin, orient=orient) children(); 
 }
 
 module emt_threaded_rod_side(spec="M8", length=30, anchor=BOTTOM, spin=0, orient=UP) {
     // Screw stud
-    screw(spec, l=length, head="none", anchor=anchor, spin=spin, orient=orient);
+    screw(spec, l=length, head="none", anchor=anchor, spin=spin, orient=orient) children();
 }
 
 
