@@ -2,82 +2,118 @@ include <BOSL2/std.scad>
 include <BOSL2/screws.scad>
 use <emt_tube.scad>
 
-/* [Hub] */
-// $fn
-resolution = 50;
-// Main Hub Trade Size (Determines Hub Size)
-Main_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-// Wall Thickness (mm)
-Wall = 4;
-// Tolerance Gap (mm) - Total diametric clearance
-Gap = 0.5;
-hub_rounding = 5;
+/* [Main Configuration] */
+// Controls the smoothness of curved surfaces. Higher values increase render time.
+resolution = 50; // [20:10:100]
+// The primary trade size for the hub, determining the base block dimensions.
+main_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Thickness of the hub walls and connector sleeves.
+wall_thickness = 4; // [2:0.5:10]
+// Diametric clearance for fit. Increase for looser printed parts, decrease for tight press-fits.
+gap = 0.5; // [0:0.05:1.0]
+// Radius of the rounded corners on the main hub block.
+hub_rounding = 5; // [0:0.5:10]
+// Global override for cup length. Set to 0 to use side-specific lengths (same as hub width).
 cup_length_override = 0; // [0:0.1:500]
+// Roundness of the socket exteriors in percent. 100% is cylindrical, 0% is square.
+socket_roundness = 100; // [0:1:100]
 
-/* [Up Side (Z+)] */
-Up_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Up_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Up_Screw_Spec = "M8";
-Up_Length = 50;
+/* [Top Connection (Z+)] */
+// Type of connection for the top face.
+up_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+up_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+up_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+up_length = 50; // [0:0.1:200]
 
-/* [Down Side (Z-)] */
-Down_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Down_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Down_Screw_Spec = "M8";
-Down_Length = 50;
+/* [Bottom Connection (Z-)] */
+// Type of connection for the bottom face.
+down_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+down_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+down_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+down_length = 50; // [0:0.1:200]
 
-/* [Left Side (X-)] */
-Left_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Left_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Left_Screw_Spec = "M8";
-Left_Length = 50;
+/* [Left Connection (X-)] */
+// Type of connection for the left face.
+left_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+left_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+left_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+left_length = 50; // [0:0.1:200]
 
-/* [Right Side (X+)] */
-Right_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Right_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Right_Screw_Spec = "M8";
-Right_Length = 50;
+/* [Right Connection (X+)] */
+// Type of connection for the right face.
+right_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+right_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+right_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+right_length = 50; // [0:0.1:200]
 
-/* [Front Side (Y-)] */
-Front_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Front_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Front_Screw_Spec = "M8";
-Front_Length = 50;
+/* [Front Connection (Y-)] */
+// Type of connection for the front face.
+front_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+front_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+front_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+front_length = 50; // [0:0.1:200]
 
-/* [Back Side (Y+)] */
-Back_Type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
-Back_EMT_Size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
-Back_Screw_Spec = "M8";
-Back_Length = 50;
+/* [Back Connection (Y+)] */
+// Type of connection for the back face.
+back_type = "none"; // [none, socket, plug, screw_hole, threaded_rod, cup]
+// Trade size for EMT conduit connections (ignored for screw/rod types).
+back_emt_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
+// Screw specification for holes or rods (e.g., M8, 1/4-20).
+back_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18, 3/8-16]
+// Length of the connection feature (socket depth, rod length, etc.).
+back_length = 50; // [0:0.1:200]
 
 /* [Hidden] */
 $fn = resolution;
 
-module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, anchor=BOTTOM, spin=0, orient=UP) {
+module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
     outer_d = inner_d + 2*wall;
     h = hole_length + base;
+    // Cap rounding slightly below half-width to prevent BOSL2 assertion failure
+    max_r = (outer_d / 2) - 0.01;
+    eff_rounding = min(max_r, (outer_d / 2) * (roundness / 100));
     
-    attachable(anchor, spin, orient, d=outer_d, h=h) {
-        union() {
-            down(h/2) {
-                cyl(d=outer_d, h=base, anchor=BOTTOM);
-                up(base) tube(h=hole_length, od=outer_d, id=inner_d, anchor=BOTTOM);
+    attachable(anchor, spin, orient, size=[outer_d, outer_d, h]) {
+        down(h/2) {
+            diff("hole") {
+                cuboid([outer_d, outer_d, h], rounding=eff_rounding, edges="Z", anchor=BOTTOM);
+                up(base) tag("hole") cyl(d=inner_d, h=hole_length+0.1, anchor=BOTTOM);
             }
         }
         children();
     }
 }
 
-module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, base_height=5, wall=4, fit_tolerance=0.127, anchor=BOTTOM, spin=0, orient=UP) {
+module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, base_height=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
     outer_d = inner_d + 2*wall;
+    // Cap rounding slightly below half-width to prevent BOSL2 assertion failure
+    max_r = (outer_d / 2) - 0.01;
+    eff_rounding = min(max_r, (outer_d / 2) * (roundness / 100));
+
     diff("hole") {
         cuboid([base_length, base_width, base_height], rounding=wall/2, edges=[FRONT+LEFT, FRONT+RIGHT, BACK+LEFT, BACK+RIGHT], anchor=anchor, spin=spin, orient=orient) {
-            position(TOP) down(wall) tube(od=outer_d, id=inner_d, h=length, anchor=LEFT, spin=spin, orient=LEFT) {
-                right(outer_d/2) tag("hole") cube([outer_d, outer_d+0.1, length+0.1], anchor=TOP, center=true);
+            position(TOP) down(wall) cuboid([outer_d, outer_d, length], rounding=eff_rounding, edges="Z", anchor=LEFT, orient=LEFT) {
+                tag("hole") cyl(d=inner_d, h=length+0.1);
+                right(outer_d/2) tag("hole") cube([outer_d, outer_d+0.1, length+20], anchor=CENTER, center=true);
             }
-            children();
+            children();                
         } 
     }
 }
@@ -101,17 +137,18 @@ module emt_threaded_rod_side(spec="M8", length=30, anchor=BOTTOM, spin=0, orient
 
 
 module emt_connector(
-    size=Main_Size, 
-    wall=Wall, 
-    gap=Gap, 
+    size=main_size, 
+    wall=wall_thickness, 
+    gap=gap,
+    roundness=socket_roundness,
     
     // Side Configurations passed as simple arguments for API usage
-    up_type=Up_Type,       up_emt=Up_EMT_Size,       up_screw=Up_Screw_Spec,       up_len=Up_Length,
-    down_type=Down_Type,   down_emt=Down_EMT_Size,   down_screw=Down_Screw_Spec,   down_len=Down_Length,
-    left_type=Left_Type,   left_emt=Left_EMT_Size,   left_screw=Left_Screw_Spec,   left_len=Left_Length,
-    right_type=Right_Type, right_emt=Right_EMT_Size, right_screw=Right_Screw_Spec, right_len=Right_Length,
-    front_type=Front_Type, front_emt=Front_EMT_Size, front_screw=Front_Screw_Spec, front_len=Front_Length,
-    back_type=Back_Type,   back_emt=Back_EMT_Size,   back_screw=Back_Screw_Spec,   back_len=Back_Length,
+    up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,
+    down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,
+    left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,
+    right_type=right_type, right_emt=right_emt_size, right_screw=right_screw_spec, right_len=right_length,
+    front_type=front_type, front_emt=front_emt_size, front_screw=front_screw_spec, front_len=front_length,
+    back_type=back_type,   back_emt=back_emt_size,   back_screw=back_screw_spec,   back_len=back_length,
     
     anchor=CENTER, 
     spin=0, 
@@ -155,11 +192,11 @@ module emt_connector(
 
                 attach(vec, overlap=overlap_amt) {
                     // Apply resolution factor for smoother cylinders
-                    // Sockets/Plugs get high res, Screws get standard res
-                    $fn = (type == "socket" || type == "plug") ? resolution * 2 : resolution;
+                    // Sockets/Plugs/Cups get high res, Screws get standard res
+                    $fn = (type == "socket" || type == "plug" || type == "cup") ? resolution * 2 : resolution;
 
                     if (type == "socket") {
-                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall);
+                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, roundness=roundness);
                     }
                     else if (type == "plug") {
                         emt_plug_side(trade_size=emt_sz, length=eff_len);
@@ -172,7 +209,7 @@ module emt_connector(
                     }
                     else if (type == "cup") {
                         cup_length = cup_length_override ? cup_length_override : hub_size;
-                        emt_cup_side(trade_size=emt_sz, length=cup_length, base_width=hub_size-2*rounding, base_length=hub_size, base_height=inset, wall=wall);
+                        emt_cup_side(trade_size=emt_sz, length=cup_length, base_width=(hub_size-2*rounding)/2, base_length=hub_size, base_height=inset, wall=wall, roundness=roundness);
                     }
                 }
             }
@@ -181,6 +218,4 @@ module emt_connector(
     }
 }
 
-// Render the connector if main file (for Customizer)
 emt_connector();
-//emt_coupler_side();
