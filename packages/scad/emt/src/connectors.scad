@@ -9,8 +9,8 @@ resolution = 50; // [20:10:100]
 main_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
 // Thickness of the hub walls and connector sleeves.
 wall_thickness = 4; // [2:0.5:10]
-// Radius of the rounded corners on the main hub block.
-hub_rounding = 5; // [0:0.5:10]
+// Roundness of the main hub block (0=square, 100=sphere).
+hub_roundness = 20; // [0:1:100]
 // Diametric clearance for coupler fit. Zero for exact size. 0.127 for tight fit. 0.15-0.25 for slip fit.
 fit_tolerance = 0.127; // [0:0.001:1.0]
 
@@ -157,15 +157,19 @@ module emt_connector(
     anchor=CENTER, 
     spin=0, 
     orient=UP,
-    rounding=hub_rounding
+    roundness=hub_roundness
 ) {
     // Resolve Main Hub Dimensions
     dims = emt_dims(size);
     hub_od = dims[0];
     hub_size = hub_od + 2 * wall;
     
+    // Calculate effective rounding based on percentage
+    max_r = (hub_size / 2) - 0.01;
+    eff_rounding = min(max_r, (hub_size / 2) * (roundness / 100));
+
     // Amount to sink attachments into the block for blending
-    inset = rounding;
+    inset = eff_rounding;
 
     // Structure defining all 6 sides
     sides = [
@@ -178,7 +182,7 @@ module emt_connector(
     ];
 
     diff("neg")
-    cuboid(hub_size, rounding=rounding, anchor=anchor, spin=spin, orient=orient, $fn=2*resolution) {
+    cuboid(hub_size, rounding=eff_rounding, anchor=anchor, spin=spin, orient=orient, $fn=2*resolution) {
         for (s = sides) {
             vec    = s[0];
             type   = s[1];
@@ -213,7 +217,7 @@ module emt_connector(
                         emt_threaded_rod_side(spec=scr_sp, length=eff_len);
                     }
                     else if (type == "cup") {
-                        emt_cup_side(trade_size=emt_sz, length=s_len, base_width=(hub_size-2*rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
+                        emt_cup_side(trade_size=emt_sz, length=s_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
                     }
                 }
             }
