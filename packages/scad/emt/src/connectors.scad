@@ -25,6 +25,8 @@ up_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-18,
 up_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 up_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+up_recess = 0; // [0:0.1:100]
 
 /* [Bottom Connection (Z-)] */
 // Type of connection for the bottom face.
@@ -37,6 +39,8 @@ down_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-1
 down_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 down_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+down_recess = 0; // [0:0.1:100]
 
 /* [Left Connection (X-)] */
 // Type of connection for the left face.
@@ -49,6 +53,8 @@ left_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-1
 left_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 left_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+left_recess = 0; // [0:0.1:100]
 
 /* [Right Connection (X+)] */
 // Type of connection for the right face.
@@ -61,6 +67,8 @@ right_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-
 right_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 right_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+right_recess = 0; // [0:0.1:100]
 
 /* [Front Connection (Y-)] */
 // Type of connection for the front face.
@@ -73,6 +81,8 @@ front_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-
 front_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 front_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+front_recess = 0; // [0:0.1:100]
 
 /* [Back Connection (Y+)] */
 // Type of connection for the back face.
@@ -85,11 +95,13 @@ back_screw_spec = "M8"; // [M6, M8, M10, M12, M14, M16, M18, M20, 1/4-20, 5/16-1
 back_length = 50; // [0:0.1:200]
 // Roundness of the socket/cup exterior (0=square, 100=cylinder)
 back_roundness = 100; // [0:1:100]
+// Depth of the socket hole extending into the hub (0 = stops at socket base).
+back_recess = 0; // [0:0.1:100]
 
 /* [Hidden] */
 $fn = resolution;
 
-module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
+module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, recess=0, anchor=BOTTOM, spin=0, orient=UP) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
     outer_d = emt_dims(trade_size)[0] + 2*wall;
     h = hole_length + base;
@@ -99,9 +111,17 @@ module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tole
     
     attachable(anchor, spin, orient, size=[outer_d, outer_d, h]) {
         down(h/2) {
-            diff("hole") {
-                cuboid([outer_d, outer_d, h], rounding=eff_rounding, edges="Z", anchor=BOTTOM);
-                up(base) tag("hole") cyl(d=inner_d, h=hole_length+0.1, anchor=BOTTOM);
+            union() {
+                diff("hole") {
+                    cuboid([outer_d, outer_d, h], rounding=eff_rounding, edges="Z", anchor=BOTTOM);
+                    // Standard hole
+                    up(base) tag("hole") cyl(d=inner_d, h=hole_length+0.1, anchor=BOTTOM);
+                    // If recessed, we also need to clear the base of the socket itself
+                    if (recess > 0) {
+                        // Extend slightly below zero to overlap with the hub cutter
+                        down(0.01) tag("hole") cyl(d=inner_d, h=base+0.1, anchor=BOTTOM);
+                    }
+                }
             }
         }
         children();
@@ -175,12 +195,12 @@ module emt_connector(
 
     // Structure defining all 6 sides
     sides = [
-        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness],
-        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness],
-        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness],
-        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness],
-        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness],
-        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness]
+        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness,    up_recess],
+        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness,  down_recess],
+        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness,  left_recess],
+        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness, right_recess],
+        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness, front_recess],
+        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness,  back_recess]
     ];
 
     diff("neg")
@@ -192,6 +212,7 @@ module emt_connector(
             scr_sp = s[3];
             s_len  = s[4];
             s_rnd  = s[5];
+            s_rec  = s[6];
             
             if (type != "none") {
                 // For screw holes, we want them to cut the surface cleanly, so we don't inset them (or negative inset).
@@ -207,7 +228,15 @@ module emt_connector(
                     $fn = (type == "socket" || type == "plug" || type == "cup") ? resolution * 2 : resolution;
 
                     if (type == "socket") {
-                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
+                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, recess=s_rec);
+                        if (s_rec > 0) {
+                            // Explicit cutter for the hub recess
+                            // We need to cut from the hub surface (inset) down to the recess depth
+                            // Re-calculate inner_d locally
+                            inner_d = emt_dims(emt_sz)[0] + fit_tolerance;
+                            // Start at inset (surface) and go down by inset + recession amount
+                            tag("neg") up(inset+0.01) cyl(d=inner_d, h=inset+s_rec+0.02, anchor=TOP);
+                        }
                     }
                     else if (type == "plug") {
                         emt_plug_side(trade_size=emt_sz, length=eff_len);
