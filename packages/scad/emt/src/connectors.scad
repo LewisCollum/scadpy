@@ -164,6 +164,8 @@ module emt_connector(
     hub_od = dims[0];
     hub_size = hub_od + 2 * wall;
     
+    echo("Hub Dimensions:", trade_size=size, emt_od=hub_od, wall_thickness=wall, total_hub_width=hub_size);
+
     // Calculate effective rounding based on percentage
     max_r = (hub_size / 2) - 0.01;
     eff_rounding = min(max_r, (hub_size / 2) * (roundness / 100));
