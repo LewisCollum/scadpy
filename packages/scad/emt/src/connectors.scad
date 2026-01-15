@@ -9,10 +9,10 @@ resolution = 50; // [20:10:100]
 main_size = "1"; // [1/2, 3/4, 1, 1-1/4, 1-1/2, 2, 2-1/2, 3, 3-1/2, 4]
 // Thickness of the hub walls and connector sleeves.
 wall_thickness = 4; // [2:0.5:10]
-// Diametric clearance for fit. Increase for looser printed parts, decrease for tight press-fits.
-gap = 0.5; // [0:0.05:1.0]
 // Radius of the rounded corners on the main hub block.
 hub_rounding = 5; // [0:0.5:10]
+// Diametric clearance for coupler fit. Zero for exact size. 0.127 for tight fit. 0.15-0.25 for slip fit.
+fit_tolerance = 0.127; // [0:0.001:1.0]
 
 /* [Top Connection (Z+)] */
 // Type of connection for the top face.
@@ -91,7 +91,7 @@ $fn = resolution;
 
 module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
-    outer_d = inner_d + 2*wall;
+    outer_d = emt_dims(trade_size)[0] + 2*wall;
     h = hole_length + base;
     // Cap rounding slightly below half-width to prevent BOSL2 assertion failure
     max_r = (outer_d / 2) - 0.01;
@@ -110,7 +110,7 @@ module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tole
 
 module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, base_height=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
-    outer_d = inner_d + 2*wall;
+    outer_d = emt_dims(trade_size)[0] + 2*wall;
     // Cap rounding slightly below half-width to prevent BOSL2 assertion failure
     max_r = (outer_d / 2) - 0.01;
     eff_rounding = min(max_r, (outer_d / 2) * (roundness / 100));
@@ -145,10 +145,8 @@ module emt_threaded_rod_side(spec="M8", length=30, anchor=BOTTOM, spin=0, orient
 module emt_connector(
     size=main_size, 
     wall=wall_thickness, 
-    gap=gap,
-    // (removed global roundness)
+    fit_tolerance=fit_tolerance,
     
-    // Side Configurations passed as simple arguments for API usage
     up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,    up_roundness=up_roundness,
     down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,    down_roundness=down_roundness,
     left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,    left_roundness=left_roundness,
@@ -180,7 +178,7 @@ module emt_connector(
     ];
 
     diff("neg")
-    cuboid(hub_size, rounding=rounding, anchor=anchor, spin=spin, orient=orient, $fn=resolution) {
+    cuboid(hub_size, rounding=rounding, anchor=anchor, spin=spin, orient=orient, $fn=2*resolution) {
         for (s = sides) {
             vec    = s[0];
             type   = s[1];
@@ -192,7 +190,7 @@ module emt_connector(
             if (type != "none") {
                 // For screw holes, we want them to cut the surface cleanly, so we don't inset them (or negative inset).
                 // For additive parts, we inset them to blend.
-                overlap_amt = (type == "screw_hole") ? -0.01 : inset;
+                overlap_amt = (type == "screw_hole") ? -0.01 : (type == "cup") ? (wall-0.1) : inset;
                 
                 // Add inset to length so the protruding length matches user spec for additive parts
                 eff_len = (type == "screw_hole") ? s_len : s_len + inset;
@@ -203,19 +201,19 @@ module emt_connector(
                     $fn = (type == "socket" || type == "plug" || type == "cup") ? resolution * 2 : resolution;
 
                     if (type == "socket") {
-                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, roundness=s_rnd);
+                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
                     }
                     else if (type == "plug") {
                         emt_plug_side(trade_size=emt_sz, length=eff_len);
                     }
                     else if (type == "screw_hole") {
-                        emt_screw_hole_side(spec=scr_sp, length=eff_len, anchor=BOTTOM /*keep set to BOTTOM*/, orient=DOWN);
+                        emt_screw_hole_side(spec=scr_sp, length=eff_len, anchor=BOTTOM, orient=DOWN);
                     }
                     else if (type == "threaded_rod") {
                         emt_threaded_rod_side(spec=scr_sp, length=eff_len);
                     }
                     else if (type == "cup") {
-                        emt_cup_side(trade_size=emt_sz, length=s_len, base_width=(hub_size-2*rounding)/2, base_length=hub_size, base_height=inset, wall=wall, roundness=s_rnd);
+                        emt_cup_side(trade_size=emt_sz, length=s_len, base_width=(hub_size-2*rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
                     }
                 }
             }
