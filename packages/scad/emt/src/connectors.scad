@@ -31,6 +31,12 @@ up_recess = 0; // [0:0.1:100]
 up_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 up_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+up_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+up_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+up_off_ud = 0; // [-100:0.1:100]
 
 /* [Bottom Connection (Z-)] */
 // Type of connection for the bottom face.
@@ -49,6 +55,12 @@ down_recess = 0; // [0:0.1:100]
 down_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 down_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+down_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+down_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+down_off_ud = 0; // [-100:0.1:100]
 
 /* [Left Connection (X-)] */
 // Type of connection for the left face.
@@ -67,6 +79,12 @@ left_recess = 0; // [0:0.1:100]
 left_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 left_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+left_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+left_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+left_off_ud = 0; // [-100:0.1:100]
 
 /* [Right Connection (X+)] */
 // Type of connection for the right face.
@@ -85,6 +103,12 @@ right_recess = 0; // [0:0.1:100]
 right_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 right_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+right_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+right_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+right_off_ud = 0; // [-100:0.1:100]
 
 /* [Front Connection (Y-)] */
 // Type of connection for the front face.
@@ -103,6 +127,12 @@ front_recess = 0; // [0:0.1:100]
 front_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 front_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+front_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+front_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+front_off_ud = 0; // [-100:0.1:100]
 
 /* [Back Connection (Y+)] */
 // Type of connection for the back face.
@@ -121,11 +151,17 @@ back_recess = 0; // [0:0.1:100]
 back_cup_count = 1; // [1:1:10]
 // (Cup Only) Length of each individual cup section (0 = evenly divide total space).
 back_cup_seg_len = 0; // [0:0.1:200]
+// Extra wall thickness/padding for this face. Useful for deeper screw holes.
+back_padding = 0; // [0:0.1:50]
+// Offset position of the feature on the face (Left/Right).
+back_off_lr = 0; // [-100:0.1:100]
+// Offset position of the feature on the face (Up/Down).
+back_off_ud = 0; // [-100:0.1:100]
 
 /* [Hidden] */
 $fn = resolution;
 
-module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, recess=0, anchor=BOTTOM, spin=0, orient=UP) {
+module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tolerance=0.127, roundness=100, recess=0, anchor=BOTTOM, spin=0, orient=UP, expand=[0,0,0,0]) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
     outer_d = emt_dims(trade_size)[0] + 2*wall;
     h = hole_length + base;
@@ -133,13 +169,23 @@ module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tole
     max_r = (outer_d / 2) - 0.01;
     eff_rounding = min(max_r, (outer_d / 2) * (roundness / 100));
     
-    attachable(anchor, spin, orient, size=[outer_d, outer_d, h]) {
+    // expand = [x_neg, x_pos, y_neg, y_pos] relative to the cross section of the socket
+    base_x = outer_d;
+    base_y = outer_d;
+    tot_x = base_x + expand[0] + expand[1];
+    tot_y = base_y + expand[2] + expand[3];
+    c_off_x = (expand[1] - expand[0]) / 2;
+    c_off_y = (expand[3] - expand[2]) / 2;
+
+    attachable(anchor, spin, orient, size=[tot_x, tot_y, h]) {
         down(h/2) {
             union() {
                 diff("hole") {
-                    cuboid([outer_d, outer_d, h], rounding=eff_rounding, edges="Z", anchor=BOTTOM);
-                    // Standard hole
+                    translate([c_off_x, c_off_y, 0])
+                    cuboid([tot_x, tot_y, h], rounding=eff_rounding, edges="Z", anchor=BOTTOM);
+                    // Standard hole (remains at local 0,0)
                     up(base) tag("hole") cyl(d=inner_d, h=hole_length+0.1, anchor=BOTTOM);
+
                     // If recessed, we also need to clear the base of the socket itself
                     if (recess > 0) {
                         // Extend slightly below zero to overlap with the hub cutter
@@ -208,12 +254,12 @@ module emt_connector(
     wall=wall_thickness, 
     fit_tolerance=fit_tolerance,
     
-    up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,    up_roundness=up_roundness,       up_recess=up_recess,       up_cup_count=up_cup_count,       up_cup_seg_len=up_cup_seg_len,
-    down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,    down_roundness=down_roundness,   down_recess=down_recess,   down_cup_count=down_cup_count,   down_cup_seg_len=down_cup_seg_len,
-    left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,    left_roundness=left_roundness,   left_recess=left_recess,   left_cup_count=left_cup_count,   left_cup_seg_len=left_cup_seg_len,
-    right_type=right_type, right_emt=right_emt_size, right_screw=right_screw_spec, right_len=right_length,    right_roundness=right_roundness, right_recess=right_recess, right_cup_count=right_cup_count, right_cup_seg_len=right_cup_seg_len,
-    front_type=front_type, front_emt=front_emt_size, front_screw=front_screw_spec, front_len=front_length,    front_roundness=front_roundness, front_recess=front_recess, front_cup_count=front_cup_count, front_cup_seg_len=front_cup_seg_len,
-    back_type=back_type,   back_emt=back_emt_size,   back_screw=back_screw_spec,   back_len=back_length,    back_roundness=back_roundness,   back_recess=back_recess,   back_cup_count=back_cup_count,   back_cup_seg_len=back_cup_seg_len,
+    up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,    up_roundness=up_roundness,       up_recess=up_recess,       up_cup_count=up_cup_count,       up_cup_seg_len=up_cup_seg_len,       up_pad=up_padding,       up_olr=up_off_lr,       up_oud=up_off_ud,
+    down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,    down_roundness=down_roundness,   down_recess=down_recess,   down_cup_count=down_cup_count,   down_cup_seg_len=down_cup_seg_len,   down_pad=down_padding,   down_olr=down_off_lr,   down_oud=down_off_ud,
+    left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,    left_roundness=left_roundness,   left_recess=left_recess,   left_cup_count=left_cup_count,   left_cup_seg_len=left_cup_seg_len,   left_pad=left_padding,   left_olr=left_off_lr,   left_oud=left_off_ud,
+    right_type=right_type, right_emt=right_emt_size, right_screw=right_screw_spec, right_len=right_length,    right_roundness=right_roundness, right_recess=right_recess, right_cup_count=right_cup_count, right_cup_seg_len=right_cup_seg_len,   right_pad=right_padding,   right_olr=right_off_lr,   right_oud=right_off_ud,
+    front_type=front_type, front_emt=front_emt_size, front_screw=front_screw_spec, front_len=front_length,    front_roundness=front_roundness, front_recess=front_recess, front_cup_count=front_cup_count, front_cup_seg_len=front_cup_seg_len,   front_pad=front_padding,   front_olr=front_off_lr,   front_oud=front_off_ud,
+    back_type=back_type,   back_emt=back_emt_size,   back_screw=back_screw_spec,   back_len=back_length,    back_roundness=back_roundness,   back_recess=back_recess,   back_cup_count=back_cup_count,   back_cup_seg_len=back_cup_seg_len,   back_pad=back_padding,   back_olr=back_off_lr,   back_oud=back_off_ud,
     
     anchor=CENTER, 
     spin=0, 
@@ -236,16 +282,35 @@ module emt_connector(
 
     // Structure defining all 6 sides
     sides = [
-        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness,    up_recess, up_cup_count, up_cup_seg_len],
-        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness,  down_recess, down_cup_count, down_cup_seg_len],
-        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness,  left_recess, left_cup_count, left_cup_seg_len],
-        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness, right_recess, right_cup_count, right_cup_seg_len],
-        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness, front_recess, front_cup_count, front_cup_seg_len],
-        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness,  back_recess, back_cup_count, back_cup_seg_len]
+        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness,    up_recess, up_cup_count, up_cup_seg_len, up_pad, up_olr, up_oud],
+        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness,  down_recess, down_cup_count, down_cup_seg_len, down_pad, down_olr, down_oud],
+        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness,  left_recess, left_cup_count, left_cup_seg_len, left_pad, left_olr, left_oud],
+        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness, right_recess, right_cup_count, right_cup_seg_len, right_pad, right_olr, right_oud],
+        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness, front_recess, front_cup_count, front_cup_seg_len, front_pad, front_olr, front_oud],
+        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness,  back_recess, back_cup_count, back_cup_seg_len, back_pad, back_olr, back_oud]
     ];
+    
+    // Check user specified padding to calculate the actual main block geometry
+    // Total Size = Original Hub Size + Padding
+    // Center Offset = (PositiveSidePadding - NegativeSidePadding) / 2
+    
+    pad_x = left_pad + right_pad;
+    pad_y = front_pad + back_pad;
+    pad_z = up_pad + down_pad;
+    
+    hub_dims = [hub_size + pad_x, hub_size + pad_y, hub_size + pad_z];
+    
+    // Calculate center shift so that (0,0,0) represents the "functional center" (tube intersection)
+    // The functional center (0,0,0) is at distance 'hub_size/2' from the original unpadded faces.
+    // If we add Left Padding, the Left Face moves to -(hub_size/2 + left_pad).
+    // If we add Right Padding, the Right Face moves to +(hub_size/2 + right_pad).
+    // The geometric center of the new block is (RightBound + LeftBound) / 2
+    // = ( (hub/2 + R) + (-hub/2 - L) ) / 2 = (R - L) / 2.
+    center_offset = [ (right_pad - left_pad)/2, (back_pad - front_pad)/2, (up_pad - down_pad)/2 ];
 
     diff("neg")
-    cuboid(hub_size, rounding=eff_rounding, anchor=anchor, spin=spin, orient=orient, $fn=2*resolution) {
+    translate(center_offset)
+    cuboid(hub_dims, rounding=eff_rounding, anchor=anchor, spin=spin, orient=orient, $fn=2*resolution) {
         for (s = sides) {
             vec    = s[0];
             type   = s[1];
@@ -256,8 +321,59 @@ module emt_connector(
             s_rec  = s[6];
             s_count = s[7];
             s_seg_len = s[8];
+            s_p    = s[9];
+            s_lr   = s[10];
+            s_ud   = s[11];
+            
+            // Calculate expansion needed for Side Sockets to match Hub Padding (e.g. for printing support)
+            // Socket Width = outer_d. Radius = outer_d/2.
+            // Hub Extend = hub_size/2 + padding.
+            // Expansion = max(0, HubExtend - SocketRadius).
+            
+            s_outer_d = emt_dims(emt_sz)[0] + 2*wall;
+            s_r = s_outer_d / 2;
+            
+            w_z_pos = max(0, (hub_size/2 + up_pad) - s_r);
+            w_z_neg = max(0, (hub_size/2 + down_pad) - s_r);
+            w_x_pos = max(0, (hub_size/2 + right_pad) - s_r);
+            w_x_neg = max(0, (hub_size/2 + left_pad) - s_r);
+            w_y_pos = max(0, (hub_size/2 + back_pad) - s_r);
+            w_y_neg = max(0, (hub_size/2 + front_pad) - s_r);
+            
+            // Map World alignment to Local Socket Cross-Section alignment [xn, xp, yn, yp]
+            // Logic based on standard BOSL2 attach() orientations
+            // For LEFT/RIGHT, Local Y aligns with World Z (Up/Down), X aligns with World Y (Front/Back)
+            
+            // Correction for standard Expand Vec mapping without offsets:
+            base_expand = 
+                (vec == LEFT)  ? [w_y_pos, w_y_neg, w_z_neg, w_z_pos] : 
+                (vec == RIGHT) ? [w_y_neg, w_y_pos, w_z_neg, w_z_pos] : 
+                (vec == FRONT) ? [w_x_neg, w_x_pos, w_z_neg, w_z_pos] : 
+                (vec == BACK)  ? [w_x_neg, w_x_pos, w_z_pos, w_z_neg] : 
+                [0,0,0,0];
+            
+            // Apply offsets to calculation
+            // Expansion[0] (Neg X) += s_lr. Expansion[1] (Pos X) -= s_lr.
+            
+            expand_vec = [
+                max(0, base_expand[0] + s_lr),
+                max(0, base_expand[1] - s_lr),
+                max(0, base_expand[2] + s_ud),
+                max(0, base_expand[3] - s_ud)
+            ];
             
             if (type != "none") {
+                // Correct for the geometric center vs functional center shift
+                // The cuboid is shifted by center_offset. 
+                // attach() snaps to the geometric center of the face.
+                // We want to snap to the functional center (projected onto the face).
+                // So we assume the shift in the directions perpendicular to the face normal.
+                
+                fix_vec = 
+                    (vec.z != 0) ? [-center_offset.x, -center_offset.y, 0] :
+                    (vec.x != 0) ? [0, -center_offset.y, -center_offset.z] :
+                    [-center_offset.x, 0, -center_offset.z]; // Y-axis normal
+
                 // For screw holes, we want them to cut the surface cleanly, so we don't inset them (or negative inset).
                 // For additive parts, we inset them to blend.
                 overlap_amt = (type == "screw_hole") ? -0.01 : (type == "cup") ? (wall-0.1) : inset;
@@ -265,35 +381,40 @@ module emt_connector(
                 // Add inset to length so the protruding length matches user spec for additive parts
                 eff_len = (type == "screw_hole") ? s_len : s_len + inset;
 
+                translate(fix_vec)
                 attach(vec, overlap=overlap_amt) {
-                    // Apply resolution factor for smoother cylinders
-                    // Sockets/Plugs/Cups get high res, Screws get standard res
-                    $fn = (type == "socket" || type == "plug" || type == "cup") ? resolution * 2 : resolution;
-
-                    if (type == "socket") {
-                        emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, recess=s_rec);
-                        if (s_rec > 0) {
-                            // Explicit cutter for the hub recess
-                            // We need to cut from the hub surface (inset) down to the recess depth
-                            // Re-calculate inner_d locally
-                            inner_d = emt_dims(emt_sz)[0] + fit_tolerance;
-                            // Start at inset (surface) and go down by recession amount
-                            tag("neg") up(inset+0.01) cyl(d=inner_d, h=s_rec+0.02, anchor=TOP);
+                    // Apply Manual Offset in the Local Tangent Plane
+                    translate([s_lr, s_ud, 0]) {
+                        // Apply resolution factor for smoother cylinders
+                        // Sockets/Plugs/Cups get high res, Screws get standard res
+                        $fn = (type == "socket" || type == "plug" || type == "cup") ? resolution * 2 : resolution;
+    
+                        if (type == "socket") {
+                            // Pass the offset-compensated expansion vector
+                            emt_coupler_side(trade_size=emt_sz, hole_length=s_len, base=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, recess=s_rec, expand=expand_vec);
+                            if (s_rec > 0) {
+                                // Explicit cutter for the hub recess
+                                // We need to cut from the hub surface (inset) down to the recess depth
+                                // Re-calculate inner_d locally
+                                inner_d = emt_dims(emt_sz)[0] + fit_tolerance;
+                                // Start at inset (surface) and go down by recession amount
+                                tag("neg") up(inset+0.01) cyl(d=inner_d, h=s_rec+0.02, anchor=TOP);
+                            }
                         }
-                    }
-                    else if (type == "plug") {
-                        emt_plug_side(trade_size=emt_sz, length=eff_len);
-                    }
-                    else if (type == "screw_hole") {
-                        emt_screw_hole_side(spec=scr_sp, length=eff_len, anchor=BOTTOM, orient=DOWN);
-                    }
-                    else if (type == "threaded_rod") {
-                        emt_threaded_rod_side(spec=scr_sp, length=eff_len);
-                    }
-                    else if (type == "cup") {
-                        cup_len = (s_len == 0) ? hub_size : s_len;
-                        // No shifting, just centered using standard cup side logic (which handles centering)
-                        emt_cup_side(trade_size=emt_sz, length=cup_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, cup_count=s_count, cup_seg_len=s_seg_len);
+                        else if (type == "plug") {
+                            emt_plug_side(trade_size=emt_sz, length=eff_len);
+                        }
+                        else if (type == "screw_hole") {
+                            emt_screw_hole_side(spec=scr_sp, length=eff_len, anchor=BOTTOM, orient=DOWN);
+                        }
+                        else if (type == "threaded_rod") {
+                            emt_threaded_rod_side(spec=scr_sp, length=eff_len);
+                        }
+                        else if (type == "cup") {
+                            cup_len = (s_len == 0) ? hub_size : s_len;
+                            // No shifting, just centered using standard cup side logic (which handles centering)
+                            emt_cup_side(trade_size=emt_sz, length=cup_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, cup_count=s_count, cup_seg_len=s_seg_len);
+                        }
                     }
                 }
             }
