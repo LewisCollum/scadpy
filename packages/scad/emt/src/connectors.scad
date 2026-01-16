@@ -248,7 +248,8 @@ module emt_connector(
                         emt_threaded_rod_side(spec=scr_sp, length=eff_len);
                     }
                     else if (type == "cup") {
-                        emt_cup_side(trade_size=emt_sz, length=s_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
+                        cup_len = (s_len == 0) ? hub_size : s_len;
+                        emt_cup_side(trade_size=emt_sz, length=cup_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
                     }
                 }
             }
