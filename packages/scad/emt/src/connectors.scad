@@ -27,6 +27,10 @@ up_length = 50; // [0:0.1:200]
 up_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 up_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+up_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+up_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Bottom Connection (Z-)] */
 // Type of connection for the bottom face.
@@ -41,6 +45,10 @@ down_length = 50; // [0:0.1:200]
 down_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 down_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+down_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+down_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Left Connection (X-)] */
 // Type of connection for the left face.
@@ -55,6 +63,10 @@ left_length = 50; // [0:0.1:200]
 left_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 left_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+left_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+left_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Right Connection (X+)] */
 // Type of connection for the right face.
@@ -69,6 +81,10 @@ right_length = 50; // [0:0.1:200]
 right_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 right_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+right_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+right_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Front Connection (Y-)] */
 // Type of connection for the front face.
@@ -83,6 +99,10 @@ front_length = 50; // [0:0.1:200]
 front_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 front_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+front_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+front_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Back Connection (Y+)] */
 // Type of connection for the back face.
@@ -97,6 +117,10 @@ back_length = 50; // [0:0.1:200]
 back_roundness = 100; // [0:1:100]
 // Depth of the socket hole extending into the hub (0 = stops at socket base).
 back_recess = 0; // [0:0.1:100]
+// (Cup Only) Number of cup sections to distribute. 1 = solid cup.
+back_cup_count = 1; // [1:1:10]
+// (Cup Only) Length of each individual cup section (0 = evenly divide total space).
+back_cup_seg_len = 0; // [0:0.1:200]
 
 /* [Hidden] */
 $fn = resolution;
@@ -128,20 +152,37 @@ module emt_coupler_side(trade_size="1", hole_length=30, base=5, wall=4, fit_tole
     }
 }
 
-module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, base_height=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP) {
+module emt_cup_side(trade_size="1", length=30, base_length=30, base_width=15, base_height=5, wall=4, fit_tolerance=0.127, roundness=100, anchor=BOTTOM, spin=0, orient=UP, cup_count=1, cup_seg_len=0) {
     inner_d = emt_dims(trade_size)[0] + fit_tolerance;
     outer_d = emt_dims(trade_size)[0] + 2*wall;
     // Cap rounding slightly below half-width to prevent BOSL2 assertion failure
     max_r = (outer_d / 2) - 0.01;
     eff_rounding = min(max_r, (outer_d / 2) * (roundness / 100));
-
-    diff("hole") {
-        cuboid([outer_d, outer_d, length], rounding=eff_rounding, edges="Z", anchor=LEFT, orient=LEFT) {
-            tag("hole") cyl(d=inner_d, h=length+0.1);
-            right(outer_d/2) tag("hole") cube([outer_d, outer_d+0.1, length+20], anchor=CENTER, center=true);
+    
+    // If SegLen is not provided (0), default to filling the space evenly (0 gap).
+    // Otherwise, use the user provided segment length.
+    eff_seg_len  = (cup_seg_len > 0) ? cup_seg_len : (length / cup_count); 
+    
+    // Pitch calculation to distribute cups within the total 'length' span
+    pitch = (cup_count > 1) ? ((length - eff_seg_len) / (cup_count - 1)) : 0;
+    
+    // Start Position (Center of first cup relative to Center of Array)
+    start_pos = (cup_count > 1) ? -(length - eff_seg_len)/2 : 0;
+    
+    for (i = [0 : cup_count - 1]) {
+        pos_z = start_pos + (i * pitch);
+        
+        translate([pos_z, 0, 0])
+        diff("hole") {
+            cuboid([outer_d, outer_d, eff_seg_len], rounding=eff_rounding, edges="Z", anchor=LEFT, orient=LEFT) {
+                tag("hole") cyl(d=inner_d, h=eff_seg_len+0.1, anchor=CENTER);
+                right(outer_d/2) tag("hole") cube([outer_d, outer_d+0.1, eff_seg_len+20], anchor=CENTER);
+            }
         }
-        children();
     }
+    
+    // Attach children at the center of the array group
+    children();
 }
 
 module emt_plug_side(trade_size="1", length=30, anchor=BOTTOM, spin=0, orient=UP) {
@@ -167,12 +208,12 @@ module emt_connector(
     wall=wall_thickness, 
     fit_tolerance=fit_tolerance,
     
-    up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,    up_roundness=up_roundness,
-    down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,    down_roundness=down_roundness,
-    left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,    left_roundness=left_roundness,
-    right_type=right_type, right_emt=right_emt_size, right_screw=right_screw_spec, right_len=right_length,    right_roundness=right_roundness,
-    front_type=front_type, front_emt=front_emt_size, front_screw=front_screw_spec, front_len=front_length,    front_roundness=front_roundness,
-    back_type=back_type,   back_emt=back_emt_size,   back_screw=back_screw_spec,   back_len=back_length,    back_roundness=back_roundness,
+    up_type=up_type,       up_emt=up_emt_size,       up_screw=up_screw_spec,       up_len=up_length,    up_roundness=up_roundness,       up_recess=up_recess,       up_cup_count=up_cup_count,       up_cup_seg_len=up_cup_seg_len,
+    down_type=down_type,   down_emt=down_emt_size,   down_screw=down_screw_spec,   down_len=down_length,    down_roundness=down_roundness,   down_recess=down_recess,   down_cup_count=down_cup_count,   down_cup_seg_len=down_cup_seg_len,
+    left_type=left_type,   left_emt=left_emt_size,   left_screw=left_screw_spec,   left_len=left_length,    left_roundness=left_roundness,   left_recess=left_recess,   left_cup_count=left_cup_count,   left_cup_seg_len=left_cup_seg_len,
+    right_type=right_type, right_emt=right_emt_size, right_screw=right_screw_spec, right_len=right_length,    right_roundness=right_roundness, right_recess=right_recess, right_cup_count=right_cup_count, right_cup_seg_len=right_cup_seg_len,
+    front_type=front_type, front_emt=front_emt_size, front_screw=front_screw_spec, front_len=front_length,    front_roundness=front_roundness, front_recess=front_recess, front_cup_count=front_cup_count, front_cup_seg_len=front_cup_seg_len,
+    back_type=back_type,   back_emt=back_emt_size,   back_screw=back_screw_spec,   back_len=back_length,    back_roundness=back_roundness,   back_recess=back_recess,   back_cup_count=back_cup_count,   back_cup_seg_len=back_cup_seg_len,
     
     anchor=CENTER, 
     spin=0, 
@@ -195,12 +236,12 @@ module emt_connector(
 
     // Structure defining all 6 sides
     sides = [
-        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness,    up_recess],
-        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness,  down_recess],
-        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness,  left_recess],
-        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness, right_recess],
-        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness, front_recess],
-        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness,  back_recess]
+        [UP,    up_type,    up_emt,    up_screw,    up_len,    up_roundness,    up_recess, up_cup_count, up_cup_seg_len],
+        [DOWN,  down_type,  down_emt,  down_screw,  down_len,  down_roundness,  down_recess, down_cup_count, down_cup_seg_len],
+        [LEFT,  left_type,  left_emt,  left_screw,  left_len,  left_roundness,  left_recess, left_cup_count, left_cup_seg_len],
+        [RIGHT, right_type, right_emt, right_screw, right_len, right_roundness, right_recess, right_cup_count, right_cup_seg_len],
+        [FRONT, front_type, front_emt, front_screw, front_len, front_roundness, front_recess, front_cup_count, front_cup_seg_len],
+        [BACK,  back_type,  back_emt,  back_screw,  back_len,  back_roundness,  back_recess, back_cup_count, back_cup_seg_len]
     ];
 
     diff("neg")
@@ -213,6 +254,8 @@ module emt_connector(
             s_len  = s[4];
             s_rnd  = s[5];
             s_rec  = s[6];
+            s_count = s[7];
+            s_seg_len = s[8];
             
             if (type != "none") {
                 // For screw holes, we want them to cut the surface cleanly, so we don't inset them (or negative inset).
@@ -249,7 +292,8 @@ module emt_connector(
                     }
                     else if (type == "cup") {
                         cup_len = (s_len == 0) ? hub_size : s_len;
-                        emt_cup_side(trade_size=emt_sz, length=cup_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd);
+                        // No shifting, just centered using standard cup side logic (which handles centering)
+                        emt_cup_side(trade_size=emt_sz, length=cup_len, base_width=(hub_size-2*eff_rounding)/2, base_length=hub_size, base_height=inset, wall=wall, fit_tolerance=fit_tolerance, roundness=s_rnd, cup_count=s_count, cup_seg_len=s_seg_len);
                     }
                 }
             }
