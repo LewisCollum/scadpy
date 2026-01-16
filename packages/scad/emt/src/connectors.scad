@@ -277,8 +277,8 @@ module emt_connector(
                             // We need to cut from the hub surface (inset) down to the recess depth
                             // Re-calculate inner_d locally
                             inner_d = emt_dims(emt_sz)[0] + fit_tolerance;
-                            // Start at inset (surface) and go down by inset + recession amount
-                            tag("neg") up(inset+0.01) cyl(d=inner_d, h=inset+s_rec+0.02, anchor=TOP);
+                            // Start at inset (surface) and go down by recession amount
+                            tag("neg") up(inset+0.01) cyl(d=inner_d, h=s_rec+0.02, anchor=TOP);
                         }
                     }
                     else if (type == "plug") {
